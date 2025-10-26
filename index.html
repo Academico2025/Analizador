@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Detector, Generador y Humanizador de Texto IA - Gemini</title>
 <style>
-/* (todo tu estilo original intacto) */
+/* (estilos originales) */
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background: #f8fafc;
@@ -57,31 +57,17 @@ button:hover { background: #1e3a8a; }
 #status span.success { color: green; font-weight: bold; }
 
 /* 🌙 MODO OSCURO */
-body.dark-mode {
-    background: #0f172a;
-    color: #e2e8f0;
-}
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 {
-    color: #f1f5f9;
-}
+body.dark-mode { background: #0f172a; color: #e2e8f0; }
+body.dark-mode h1, body.dark-mode h2, body.dark-mode h3 { color: #f1f5f9; }
 body.dark-mode textarea,
 body.dark-mode input,
 body.dark-mode select,
 body.dark-mode #resultado,
 body.dark-mode #analisisIA,
 body.dark-mode #textoGenerado,
-body.dark-mode #textoHumanizado {
-    background: #1e293b;
-    color: #f1f5f9;
-    border-color: #334155;
-}
-body.dark-mode button {
-    background: #334155;
-    color: #f1f5f9;
-}
-body.dark-mode button:hover {
-    background: #1e293b;
-}
+body.dark-mode #textoHumanizado { background: #1e293b; color: #f1f5f9; border-color: #334155; }
+body.dark-mode button { background: #334155; color: #f1f5f9; }
+body.dark-mode button:hover { background: #1e293b; }
 
 /* 🎛 Botón flotante modo oscuro */
 #toggleDarkMode {
@@ -106,19 +92,12 @@ body.dark-mode button:hover {
 <h1>🧠 Detector, Generador y Humanizador de Texto (Google Gemini)</h1>
 
 <h3>🔐 API Key</h3>
-<div style="display:flex; gap:10px;">
-    <input type="password" id="apiKeyInput" placeholder="Ingrese su API Key">
-    <button onclick="mostrarOcultarApiKey()" id="toggleApiKey">👁 Mostrar</button>
-</div>
-<button onclick="guardarApiKey()">Guardar API Key</button>
-<button onclick="verificarApiKey()">Verificar</button>
+<p>La API Key está integrada de forma interna.</p>
 <button onclick="probarConexion()">Probar conexión</button>
 <div id="status"></div>
 
 <h3>📌 Modelo IA</h3>
-<select id="modelSelect">
-    <option value="">Cargando modelos...</option>
-</select>
+<p><code>models/gemini-2.5-flash</code></p>
 
 <hr>
 
@@ -137,8 +116,8 @@ body.dark-mode button:hover {
 
 <!-- ✅ NUEVOS BOTONES EXPORTAR TEXTO VERIFICADO -->
 <div style="margin-top:10px;">
-    <button onclick="exportarPDF('resultado', 'Texto Verificado – AnalizerII')">📄 Exportar Verificado en PDF</button>
-    <button onclick="exportarWord('resultado', 'Texto Verificado – AnalizerII')">📝 Exportar Verificado en Word</button>
+    <button onclick="exportarPDF('resultado', 'Texto Verificado – AnalizerIII')">📄 Exportar Verificado en PDF</button>
+    <button onclick="exportarWord('resultado', 'Texto Verificado – AnalizerIII')">📝 Exportar Verificado en Word</button>
 </div>
 
 <hr>
@@ -150,16 +129,16 @@ body.dark-mode button:hover {
 
 <!-- ✅ NUEVOS BOTONES EXPORTAR TEXTO HUMANIZADO -->
 <div style="margin-top:10px;">
-    <button onclick="exportarPDF('textoHumanizado', 'Texto Humanizado – AnalizerII')">📄 Exportar Humanizado en PDF</button>
-    <button onclick="exportarWord('textoHumanizado', 'Texto Humanizado – AnalizerII')">📝 Exportar Humanizado en Word</button>
+    <button onclick="exportarPDF('textoHumanizado', 'Texto Humanizado – AnalizerIII')">📄 Exportar Humanizado en PDF</button>
+    <button onclick="exportarWord('textoHumanizado', 'Texto Humanizado – AnalizerIII')">📝 Exportar Humanizado en Word</button>
 </div>
 
 <button id="toggleDarkMode" onclick="toggleDark()">🌙 Modo oscuro</button>
 
 <script>
-// --- (todo tu JS original intacto hasta el final) ---
-
-let API_KEY = localStorage.getItem("apiKey") || "";
+// --- Configuración fija ---
+const API_KEY = "AIzaSyAAmmxYa8VAA6_-uOGZvjZe8tiRMXs0DAo"; // integrada
+const MODEL   = "models/gemini-2.5-flash";                  // fijo
 
 function toggleDark() {
     document.body.classList.toggle("dark-mode");
@@ -167,38 +146,8 @@ function toggleDark() {
     btn.textContent = document.body.classList.contains("dark-mode") ? "☀ Modo claro" : "🌙 Modo oscuro";
 }
 
-function mostrarOcultarApiKey() {
-    const input = document.getElementById('apiKeyInput');
-    const button = document.getElementById('toggleApiKey');
-    if (input.type === "password") {
-        input.type = "text";
-        button.textContent = "🙈 Ocultar";
-    } else {
-        input.type = "password";
-        button.textContent = "👁 Mostrar";
-    }
-}
-
 function actualizarStatus(msg, error = false) {
     document.getElementById("status").innerHTML = `<span class="${error ? 'error' : 'success'}">${msg}</span>`;
-}
-
-function guardarApiKey() {
-    API_KEY = document.getElementById("apiKeyInput").value.trim();
-    if (!API_KEY) return alert("Ingrese una API Key válida.");
-    localStorage.setItem("apiKey", API_KEY);
-    actualizarStatus("✅ API Key guardada.");
-    cargarModelos();
-}
-
-async function verificarApiKey() {
-    try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
-        if (!r.ok) throw new Error();
-        actualizarStatus("✅ API Key válida.");
-    } catch {
-        actualizarStatus("❌ API Key incorrecta o sin permisos.", true);
-    }
 }
 
 async function probarConexion() {
@@ -211,30 +160,11 @@ async function probarConexion() {
     }
 }
 
-async function cargarModelos() {
-    if (!API_KEY) return;
-    try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
-        const data = await r.json();
-        const modelos = data.models.map(m => m.name).filter(n => n.includes("gemini"));
-        document.getElementById("modelSelect").innerHTML =
-            modelos.map(m => `<option value="${m}">${m}</option>`).join("");
-        actualizarStatus("✅ Modelos cargados.");
-    } catch {
-        actualizarStatus("❌ Error al cargar modelos.", true);
-    }
-}
-if (API_KEY) {
-    document.getElementById("apiKeyInput").value = API_KEY;
-    cargarModelos();
-}
-
 async function generarTexto() {
-    const modelo = document.getElementById("modelSelect").value;
     const div = document.getElementById("textoGenerado");
     div.innerHTML = "⏳ Generando...";
     try {
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelo}:generateContent?key=${API_KEY}`, {
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${MODEL}:generateContent?key=${API_KEY}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -242,7 +172,7 @@ async function generarTexto() {
             })
         });
         const data = await r.json();
-        div.innerHTML = data.candidates[0].content.parts[0].text;
+        div.innerHTML = data?.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Sin respuesta del modelo.";
     } catch {
         div.innerHTML = "❌ Error al generar texto.";
     }
@@ -254,24 +184,18 @@ async function verificarTexto() {
     document.getElementById("resultado").innerHTML = "⏳ Analizando...";
     document.getElementById("analisisIA").innerHTML = "";
     try {
-        const prompt = `
-        Analiza este texto y responde:
-        1. ¿Es IA o humano? Explica.
-        2. Porcentaje aproximado de contenido IA.
-        3. Frases generadas por IA.
-        Texto: "${texto}"
-        `;
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${document.getElementById("modelSelect").value}:generateContent?key=${API_KEY}`, {
+        const prompt = `\nAnaliza este texto y responde:\n1. ¿Es IA o humano? Explica.\n2. Porcentaje aproximado de contenido IA.\n3. Frases generadas por IA.\nTexto: "${texto}"\n`;
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${MODEL}:generateContent?key=${API_KEY}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
         const data = await r.json();
-        const respuesta = data.candidates[0].content.parts[0].text;
+        const respuesta = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No hubo respuesta.";
         document.getElementById("resultado").innerHTML =
             respuesta.split("\n").map(p => `<p>${p}</p>`).join("");
-        const porcentaje = respuesta.match(/(\d+)%/g) ? respuesta.match(/(\d+)%/g)[0] : "No definido";
-        let frasesIA = respuesta.split(/3\./i)[1] || "";
+        const pct = respuesta.match(/(\d+)%/g) ? respuesta.match(/(\d+)%/g)[0] : "No definido";
+        let frasesIA = (respuesta.split(/3\./i)[1] || "");
         frasesIA = frasesIA.split(/[\n\.\-•]/).map(f => f.trim()).filter(f => f.length > 5);
         let resaltado = texto;
         frasesIA.forEach(frase => {
@@ -281,7 +205,7 @@ async function verificarTexto() {
         });
         document.getElementById("analisisIA").innerHTML = `
             <h3>📊 Resultados IA vs Humano</h3>
-            <p><strong>Estimación IA:</strong> ${porcentaje}</p>
+            <p><strong>Estimación IA:</strong> ${pct}</p>
             <p><strong>Texto con partes de IA resaltadas:</strong></p>
             <div style="padding:10px; border:1px solid #cbd5e1;">${resaltado}</div>
         `;
@@ -296,15 +220,14 @@ async function humanizarTexto() {
     if (!texto) return alert("Pegue un texto para humanizar.");
     div.innerHTML = "⏳ Humanizando...";
     try {
-        const prompt = `Reescribe el siguiente texto de forma más humana, natural y menos mecánica, sin cambiar su idea principal:
-"${texto}"`;
-        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${document.getElementById("modelSelect").value}:generateContent?key=${API_KEY}`, {
+        const prompt = `Reescribe el siguiente texto de forma más humana, natural y menos mecánica, sin cambiar su idea principal:\n"${texto}"`;
+        const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/${MODEL}:generateContent?key=${API_KEY}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
         const data = await r.json();
-        div.innerHTML = data.candidates[0].content.parts[0].text;
+        div.innerHTML = data?.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Sin respuesta del modelo.";
     } catch {
         div.innerHTML = "❌ Error al humanizar.";
     }
@@ -323,10 +246,9 @@ function limpiarCampos() {
     document.getElementById("resultado").innerHTML = "";
     document.getElementById("analisisIA").innerHTML = "";
     document.getElementById("textoHumanizado").innerHTML = "Aquí aparecerá el texto humanizado...";
-    alert("🧹 Campos limpiados (API Key intacta)");
 }
 
-/* --- 🧾 NUEVAS FUNCIONES EXPORTAR --- */
+/* --- 🧾 Funciones de exportación --- */
 function exportarPDF(id, titulo) {
     const texto = document.getElementById(id).innerText.trim();
     if (!texto) return alert("No hay contenido para exportar.");
